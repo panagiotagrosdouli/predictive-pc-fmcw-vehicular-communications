@@ -6,15 +6,22 @@ This repository contains two deliberately separated scientific scopes. Publicati
 
 ### Paper 1 — mechanism and operating-region study
 
-**STATUS: CORRECTED-MODEL REVALIDATION REQUIRED BEFORE FINAL NUMERICAL CLAIMS.**
+**STATUS: CORRECTED PRIMARY EVIDENCE EXECUTED; FINAL MANUSCRIPT/CI GATES IN PROGRESS.**
 
-Paper 1 asks when causal future geometry/link information improves packet scheduling for the modeled PC-FMCW/DPSK vehicular optical link. The implementation, causal architecture, Part-A link provenance, synthetic development/holdout machinery, and paired analysis are present. During the September 2026 final audit, however, a packet-deadline discretization defect was found: an `N`-slot physical deadline was encoded with inclusive last-service index `arrival + N`, allowing `N+1` service slots. The historical 0.05 s regime was also not exactly representable with the 0.1 s simulator slot duration.
+During the September 2026 final audit, a packet-deadline discretization defect was found: an `N`-slot physical deadline had been encoded with inclusive last-service index `arrival + N`, allowing `N+1` service slots. The historical 0.05 s regime was also not exactly representable with the 0.1 s simulator slot duration. The simulator now uses `arrival + N - 1` and rejects non-integral physical deadlines.
 
-The simulator now uses `arrival + N - 1` and rejects physical deadlines that are not an integer number of slots. The corrected frozen protocol uses a 0.1 s tight-deadline regime plus the existing 0.5 s, load 1.1, and +3 dB SNR regimes, with fresh development seeds 20270101–20270110 and fresh holdout seeds 20270201–20270220. The guard family must be re-selected on corrected development data and evaluated once on the corrected holdout before Paper-1 headline statistics are restored.
+A fresh corrected protocol was executed in workflow run `34785876008` at SHA `2e3f48a3fa7597371d1fcb8ef505f40e2c52a1a1`. Artifact `10326910705` (`prospective-current-service-guard`) has digest `sha256:10ad8a88f4d8fa25216603b5e06171a464ab706adb9421793a3742b177127407`. Development seeds `20270101`–`20270110` and holdout seeds `20270201`–`20270220` are disjoint from each other and from the historical service-guard evidence.
 
-The earlier run 34055071988 remains immutable historical provenance. Its raw 80 holdout rows were independently re-analyzed during the audit and reproduce the versioned means, bootstrap confidence intervals, Wilcoxon p-values, Holm adjustments, and paired Cohen dz values. Those statistics are therefore internally reproducible but **pre-correction** and must not be presented as final corrected-model evidence.
+The corrected development selection chose `service_guarded_100` (guard ratio 1.0). On the fresh 20-seed holdout, all four predeclared primary goodput comparisons against Reactive Greedy are **NEUTRAL_OR_UNCERTAIN** under the frozen ±0.001 Mbps practical-margin/95% CI rule:
 
-Paper 1 remains a model-based synthetic study. It does not claim measured end-to-end optical-channel validation, road deployment, hardware-in-the-loop validation, or globally optimal scheduling. The Part-A source is a supplied PC-FMCW/DPSK reference with a separately verified receiver-derived BER LUT; the local geometry/link path is reference-SNR anchored and its absolute received power is not calibrated to measured watts.
+- deadline 0.1 s: +0.00000 Mbps, CI [0.00000, 0.00000];
+- deadline 0.5 s: +0.00035 Mbps, CI [0.00000, 0.00105];
+- offered load 1.1: -0.00050 Mbps, CI [-0.00455, 0.00285];
+- reference SNR +3 dB: +0.00080 Mbps, CI [-0.00080, 0.00255].
+
+All Holm-adjusted p-values are 1.0. The corrected evidence therefore does **not** support the historical headline that the guarded predictive scheduler improves three of four regimes. That historical run remains immutable pre-correction provenance only.
+
+Paper 1 remains a model-based synthetic mechanism study. The corrected result is a defensible null/mixed finding: future information can alter candidate decisions in diagnostics, but the robust guard selected under the frozen cross-regime development rule largely removes incremental packet-level benefit on holdout. No measured end-to-end optical-channel validation, road deployment, hardware-in-the-loop validation, or globally optimal scheduling is claimed.
 
 ### Paper 2 — communication-aware learned trajectory prediction
 
@@ -24,7 +31,7 @@ Paper 2 requires the canonical WOMD corpus/provenance, a complete 4-objective ×
 
 ## Current software verification
 
-At audit base `main` SHA `9e57ced0036300c90fddb9a4b5f155142a7f8e50`, CI run 34716692874 passed lint, 233 tests plus 20 subtests, stage-entrypoint checks, scientific monotonicity/causality validation, and Paper-1 LaTeX compilation. The combined Stage 0–8 entrypoint report still showed the learned/WOMD stages blocked by missing external inputs/artifacts; this is expected for Paper 2 and must not be conflated with Paper-1 readiness.
+The corrected evidence workflow passed static checks, unit tests, frozen development/holdout execution, cardinality verification, frozen holdout analysis, and artifact upload. A final general CI/LaTeX run is still required on the fully synchronized manuscript branch head because publication text changes after evidence generation must themselves be build-verified.
 
 ## Claim boundary
 
@@ -33,12 +40,12 @@ At audit base `main` SHA `9e57ced0036300c90fddb9a4b5f155142a7f8e50`, CI run 3471
 - Synthetic/model-derived channel quantities are not measurements.
 - Negative, null, and mixed outcomes remain part of the scientific record.
 - No categorical first-of-kind claim is made for trajectory prediction, predictive scheduling, deadline-aware vehicular resource allocation, PC-FMCW, phase coding, or vehicular optical communication.
-- The corrected Paper-1 manuscript must follow the corrected workflow artifact even if its results are weaker than the historical evidence.
+- Historical pre-correction statistics must not be presented as corrected-model evidence.
 
 ## Readiness summary
 
-**University Part B / Paper 1:** pending corrected-model revalidation and manuscript synchronization.
+**University Part B / Paper 1:** corrected primary evidence executed; manuscript/provenance synchronization and final CI/PDF audit remain.
 
-**Paper 1 external submission:** pending corrected evidence, final literature/claim synchronization, current CI/LaTeX/PDF audit, real author metadata, and a final provenance manifest. Even after those gates, the evidence remains synthetic/model-based rather than externally measured.
+**Paper 1 external submission:** still requires final literature/claim consistency, current CI/LaTeX/PDF audit, real author metadata, and final provenance review. Even after those gates, the evidence remains synthetic/model-based rather than externally measured.
 
 **Paper 2:** NOT PAPER READY.
