@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Analyze the frozen prospective current-service-guard holdout.
+"""Analyze the frozen current-service-guard holdout.
 
 This script performs the precommitted Paper-1 primary analysis on the saved
-prospective service-guard JSON artifact. It does not tune or select policies.
+service-guard JSON artifact. It does not tune or select policies.
 
 Primary endpoint: paired candidate-minus-reactive goodput difference by regime.
 Inference: 100,000 paired percentile bootstrap replicates, two-sided paired
@@ -20,9 +20,9 @@ import numpy as np
 from scipy import stats
 
 BOOTSTRAP_REPLICATES = 100_000
-BOOTSTRAP_SEED = 20260906
+BOOTSTRAP_SEED = 20260914
 PRACTICAL_MARGIN_MBPS = 0.001
-EXPECTED_REGIMES = ["deadline_0p05", "deadline_0p5", "load_1p1", "snr_plus3"]
+EXPECTED_REGIMES = ["deadline_0p1", "deadline_0p5", "load_1p1", "snr_plus3"]
 
 
 def percentile_ci(
@@ -69,8 +69,14 @@ def main() -> None:
             "Frozen development protocol selected no candidate; "
             "holdout analysis is invalid."
         )
-    if selected.get("candidate_policy") != "service_guarded_80":
-        candidate_policy = selected.get("candidate_policy")
+    candidate_policy = selected.get("candidate_policy")
+    if candidate_policy not in {
+        "service_guarded_00",
+        "service_guarded_80",
+        "service_guarded_90",
+        "service_guarded_95",
+        "service_guarded_100",
+    }:
         raise SystemExit(f"Unexpected frozen candidate: {candidate_policy}")
 
     rows = payload.get("holdout_rows", [])
@@ -134,8 +140,8 @@ def main() -> None:
         result["wilcoxon_p_holm"] = p_holm
 
     output = {
-        "schema_version": 1,
-        "status": "FROZEN_HOLDOUT_ANALYSIS",
+        "schema_version": 2,
+        "status": "CORRECTED_DEADLINE_HOLDOUT_ANALYSIS",
         "input_selected_candidate": selected,
         "analysis_protocol": {
             "primary_metric": "delta_goodput_mbps",
