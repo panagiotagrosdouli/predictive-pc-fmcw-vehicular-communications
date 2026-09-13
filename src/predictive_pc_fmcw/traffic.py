@@ -26,6 +26,28 @@ class TrafficTrace:
     success_uniforms: NDArray[np.float64]
 
 
+def _physical_duration_to_slots(duration_s: float, slot_duration_s: float, name: str) -> int:
+    """Convert a physical duration to an exact number of simulator slots.
+
+    Packet deadlines are part of the scientific protocol, so silently rounding a
+    sub-slot or non-integral duration changes the experiment being claimed.  A
+    physical deadline therefore has to be representable exactly at the chosen
+    slot duration.  The returned value is a *count* of service slots; callers
+    convert it to an inclusive last-service slot with ``arrival + count - 1``.
+    """
+    if duration_s <= 0:
+        raise ValueError(f"{name} must be positive.")
+    ratio = duration_s / slot_duration_s
+    slots = int(round(ratio))
+    if slots < 1 or not np.isclose(ratio, slots, rtol=0.0, atol=1e-9):
+        raise ValueError(
+            f"{name}={duration_s} s is not exactly representable with "
+            f"slot_duration_s={slot_duration_s} s; choose an integer number "
+            "of slots instead of silently rounding the scientific deadline."
+        )
+    return slots
+
+
 def generate_traffic_trace(
     seed: int,
     slots: int,
@@ -65,11 +87,16 @@ def generate_traffic_trace(
         )
         arrivals = np.full((slots, vehicles), per_vehicle, dtype=np.int64)
     if config.deadline_s is not None:
-        base_deadline_slots = max(
-            1, int(round(config.deadline_s / slot_duration_s))
+        base_deadline_slots = _physical_duration_to_slots(
+            config.deadline_s, slot_duration_s, "deadline_s"
         )
         jitter_seconds = config.deadline_jitter_s or 0.0
-        jitter_slots = max(0, int(round(jitter_seconds / slot_duration_s)))
+        if jitter_seconds > 0:
+            jitter_slots = _physical_duration_to_slots(
+                jitter_seconds, slot_duration_s, "deadline_jitter_s"
+            )
+        else:
+            jitter_slots = 0
     else:
         base_deadline_slots = config.deadline_slots
         jitter_slots = config.deadline_jitter_slots
@@ -83,20 +110,22 @@ def generate_traffic_trace(
             if config.traffic_class_mode == "urgent_bulk":
                 urgent = rng.random(count) < config.urgent_fraction
                 classes = np.where(urgent, "urgent", "bulk")
-                urgent_slots = max(
-                    1, int(round(config.urgent_deadline_s / slot_duration_s))
+                urgent_slots = _physical_duration_to_slots(
+                    config.urgent_deadline_s, slot_duration_s, "urgent_deadline_s"
                 )
-                bulk_slots = max(
-                    1, int(round(config.bulk_deadline_s / slot_duration_s))
+                bulk_slots = _physical_duration_to_slots(
+                    config.bulk_deadline_s, slot_duration_s, "bulk_deadline_s"
                 )
-                deadlines = slot + np.where(urgent, urgent_slots, bulk_slots)
+                duration_slots = np.where(urgent, urgent_slots, bulk_slots)
+                deadlines = slot + duration_slots - 1
             else:
                 jitter = rng.integers(
                     -jitter_slots,
                     jitter_slots + 1,
                     size=count,
                 )
-                deadlines = slot + np.maximum(1, base_deadline_slots + jitter)
+                duration_slots = np.maximum(1, base_deadline_slots + jitter)
+                deadlines = slot + duration_slots - 1
                 classes = np.full(count, "best_effort")
             vehicle_rows.append(tuple(int(value) for value in deadlines))
             vehicle_classes.append(tuple(str(value) for value in classes))
