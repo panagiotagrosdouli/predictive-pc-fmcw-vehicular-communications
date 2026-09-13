@@ -26,7 +26,11 @@ class TrafficTrace:
     success_uniforms: NDArray[np.float64]
 
 
-def _physical_duration_to_slots(duration_s: float, slot_duration_s: float, name: str) -> int:
+def _physical_duration_to_slots(
+    duration_s: float,
+    slot_duration_s: float,
+    name: str,
+) -> int:
     """Convert a physical duration to an exact number of simulator slots.
 
     Packet deadlines are part of the scientific protocol, so silently rounding a
