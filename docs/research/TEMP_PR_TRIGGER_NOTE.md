@@ -1,0 +1,1 @@
+This temporary note exists only to anchor the final pre-PR branch state and will be removed before merge.
