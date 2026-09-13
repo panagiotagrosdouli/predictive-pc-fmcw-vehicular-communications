@@ -1,17 +1,17 @@
 {
-  "schema_version": 1,
-  "status": "FROZEN_PROSPECTIVE_HOLDOUT_ANALYSIS_PROTOCOL",
-  "purpose": "Precommit the statistical interpretation of the fresh service-guard holdout before any holdout outcome is inspected.",
+  "schema_version": 2,
+  "status": "FROZEN_CORRECTED_DEADLINE_HOLDOUT_ANALYSIS_PROTOCOL",
+  "purpose": "Precommit the statistical interpretation of the fresh corrected-deadline service-guard holdout before its outcomes are inspected.",
   "paired_unit": "holdout seed within operating regime; each seed deterministically defines the matched synthetic mobility scenario and traffic trace for selected candidate and reactive baseline",
   "primary_metric": "goodput_mbps",
-  "regimes": ["deadline_0p05", "deadline_0p5", "load_1p1", "snr_plus3"],
+  "regimes": ["deadline_0p1", "deadline_0p5", "load_1p1", "snr_plus3"],
   "holdout_n_per_regime": 20,
   "practical_margin_mbps": 0.001,
   "interval": {
     "method": "paired percentile bootstrap over seed-level differences",
     "confidence_level": 0.95,
     "resamples": 100000,
-    "analysis_rng_seed": 20260906
+    "analysis_rng_seed": 20260914
   },
   "classification": {
     "HELP": "95% bootstrap CI lower bound > +0.001 Mbps",
@@ -26,10 +26,11 @@
   "secondary_metrics": ["pdr", "demand_normalized_fairness", "p95_latency_ms"],
   "secondary_interpretation": "descriptive and mechanism-supporting; do not override primary goodput classification",
   "guardrails": [
-    "Do not alter the development-selected candidate after holdout inspection.",
+    "Do not alter the corrected-development-selected candidate after holdout inspection.",
     "Do not redefine regimes, seeds, practical margin, confidence level, bootstrap count, or classification thresholds after holdout inspection.",
-    "If the development gate selects no candidate, do not inspect holdout outcomes for selection.",
-    "Do not reuse the earlier fairness-family holdout seeds for this new scheduler family.",
-    "Treat this as executed diagnostic synthetic evidence, not canonical WOMD evidence or final publication inference."
+    "If the corrected development gate selects no candidate, do not inspect holdout outcomes for selection.",
+    "Do not reuse the historical 202611/202612 service-guard seeds for the corrected evidence instance.",
+    "Treat the historical service-guard artifact as pre-correction evidence, not final corrected inference.",
+    "Treat this as synthetic model-based evidence, not WOMD or measured-channel evidence."
   ]
 }

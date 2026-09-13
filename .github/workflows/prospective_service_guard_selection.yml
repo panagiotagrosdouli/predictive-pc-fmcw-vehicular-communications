@@ -7,9 +7,22 @@ on:
       - 'configs/service_guard_selection_protocol.json'
       - 'configs/service_guard_holdout_analysis_protocol.json'
       - 'scripts/13_run_prospective_service_guard_selection.py'
+      - 'scripts/14_analyze_service_guard_holdout.py'
       - '.github/workflows/prospective_service_guard_selection.yml'
       - 'src/predictive_pc_fmcw/**'
       - 'tests/test_service_guarded_scheduler.py'
+      - 'tests/test_traffic_and_schedulers.py'
+      - 'configs/default.json'
+  pull_request:
+    paths:
+      - 'configs/service_guard_selection_protocol.json'
+      - 'configs/service_guard_holdout_analysis_protocol.json'
+      - 'scripts/13_run_prospective_service_guard_selection.py'
+      - 'scripts/14_analyze_service_guard_holdout.py'
+      - '.github/workflows/prospective_service_guard_selection.yml'
+      - 'src/predictive_pc_fmcw/**'
+      - 'tests/test_service_guarded_scheduler.py'
+      - 'tests/test_traffic_and_schedulers.py'
       - 'configs/default.json'
   workflow_dispatch:
 
@@ -49,8 +62,13 @@ jobs:
           else:
               assert len(p['holdout_rows']) == 80
           PY
+      - name: Run frozen holdout analysis
+        run: |
+          python scripts/14_analyze_service_guard_holdout.py \
+            artifacts/prospective_service_guard_selection/prospective_service_guard_selection.json \
+            --output artifacts/prospective_service_guard_selection/holdout_analysis.json
       - uses: actions/upload-artifact@v4
         with:
           name: prospective-current-service-guard
           path: artifacts/prospective_service_guard_selection/
-          retention-days: 14
+          retention-days: 30

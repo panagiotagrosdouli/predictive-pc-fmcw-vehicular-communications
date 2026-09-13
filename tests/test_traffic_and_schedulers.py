@@ -5,7 +5,7 @@ import numpy as np
 from predictive_pc_fmcw.config import SchedulerConfig, TrafficConfig
 from predictive_pc_fmcw.scheduling.base import SchedulerContext
 from predictive_pc_fmcw.scheduling.policies import build_scheduler
-from predictive_pc_fmcw.traffic import generate_traffic_trace
+from predictive_pc_fmcw.traffic import PacketQueues, generate_traffic_trace
 
 
 class TrafficAndSchedulerTest(unittest.TestCase):
@@ -33,11 +33,30 @@ class TrafficAndSchedulerTest(unittest.TestCase):
         )
         slow = generate_traffic_trace(3, 3, 2, 20, config, slot_duration_s=0.1)
         fast = generate_traffic_trace(3, 3, 2, 20, config, slot_duration_s=0.05)
-        slow_deadline = slow.deadlines[0][0][0] * 0.1
-        fast_deadline = fast.deadlines[0][0][0] * 0.05
-        self.assertAlmostEqual(slow_deadline, 1.2)
-        self.assertAlmostEqual(fast_deadline, 1.2)
+        slow_slots = slow.deadlines[0][0][0] - 0 + 1
+        fast_slots = fast.deadlines[0][0][0] - 0 + 1
+        self.assertAlmostEqual(slow_slots * 0.1, 1.2)
+        self.assertAlmostEqual(fast_slots * 0.05, 1.2)
         self.assertTrue(np.all(slow.arrivals > 0))
+
+    def test_nonrepresentable_physical_deadline_fails_closed(self):
+        config = TrafficConfig(
+            model="saturated", deadline_s=0.05, deadline_jitter_s=0.0
+        )
+        with self.assertRaisesRegex(ValueError, "not exactly representable"):
+            generate_traffic_trace(3, 3, 2, 20, config, slot_duration_s=0.1)
+
+    def test_one_slot_deadline_expires_before_second_service_slot(self):
+        config = TrafficConfig(
+            model="saturated", deadline_s=0.1, deadline_jitter_s=0.0
+        )
+        trace = generate_traffic_trace(3, 2, 1, 1, config, slot_duration_s=0.1)
+        queues = PacketQueues(vehicles=1, max_packets=10)
+        queues.add_arrivals(0, trace.deadlines[0], trace.classes[0])
+        self.assertEqual(queues.oldest_time_to_deadline(0)[0], 0.0)
+        queues.expire(1)
+        self.assertEqual(queues.lengths()[0], 0)
+        self.assertGreater(queues.deadline_dropped[0], 0)
 
     def test_urgent_and_bulk_classes_have_distinct_deadlines(self):
         config = TrafficConfig(
@@ -64,7 +83,7 @@ class TrafficAndSchedulerTest(unittest.TestCase):
                 for deadline, traffic_class in zip(
                     deadlines, classes, strict=True
                 ):
-                    expected = 1 if traffic_class == "urgent" else 10
+                    expected = 0 if traffic_class == "urgent" else 9
                     self.assertEqual(deadline - slot, expected)
 
     def test_all_policies_choose_at_most_one_eligible_vehicle(self):

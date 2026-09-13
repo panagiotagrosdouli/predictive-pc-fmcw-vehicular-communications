@@ -27,11 +27,12 @@ class LinkState:
 
 
 class LinkModel:
-    """Calibrated, geometry-dependent PC-FMCW/DPSK optical link abstraction.
+    """Reference-SNR-anchored, geometry-dependent optical link abstraction.
 
-    Absolute optical noise parameters are not claimed as measured. The model is
-    anchored by a configurable reference SNR and preserves physically expected
-    distance, atmospheric and pointing monotonicity.
+    Absolute optical noise and received-power parameters are not claimed as
+    measured or calibrated. The model is anchored by a configurable reference
+    SNR and preserves physically expected distance, atmospheric, pointing and
+    field-of-view monotonicity.
     """
 
     def __init__(self, config: LinkConfig):
