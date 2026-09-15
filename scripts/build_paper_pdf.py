@@ -186,7 +186,10 @@ def build(output_path: str | Path | None = None) -> Path:
         rightMargin=18 * mm,
         topMargin=16 * mm,
         bottomMargin=16 * mm,
-        title="When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?",
+        title=(
+            "When Does Trajectory Prediction Help "
+            "PC-FMCW/DPSK Vehicular Optical Scheduling?"
+        ),
         author="Panagiota Grosdouli",
     )
     width = A4[0] - document.leftMargin - document.rightMargin
