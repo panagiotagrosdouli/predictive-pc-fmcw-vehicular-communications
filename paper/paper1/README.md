@@ -2,7 +2,7 @@
 
 **Scope label:** `PAPER1`
 
-**Title:** *When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?*
+**Title:** *When Does Future Mobility Information Have Packet-Level Value in Vehicular Optical Scheduling?*
 
 Paper 1 is the self-contained classical/mechanism Part-B study. Reusable implementation remains under `src/predictive_pc_fmcw/`; this directory contains publication-facing protocol and manuscript material.
 
@@ -48,4 +48,4 @@ Corrected publication artifacts belong under `artifacts/paper1_final/`. Diagnost
 
 ## Current status
 
-Paper 1 has corrected primary evidence and a synchronized LaTeX scientific narrative. The final submission gate still requires a final repository/manuscript build audit on the final synchronized branch head and replacement of deliberately non-invented author/affiliation/email placeholders before external submission.
+Paper 1 has corrected primary evidence and a synchronized LaTeX scientific narrative. The literature matrix, reference verification, and Reviewer-2 audit are now complete. Final closure still requires successful CI on the exact release branch head, execution of the corrected post-merge decision-level audit, final PDF artifact inspection, and replacement of deliberately non-invented author/affiliation/email placeholders before external submission.
