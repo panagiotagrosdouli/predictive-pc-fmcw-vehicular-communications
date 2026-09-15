@@ -19,7 +19,7 @@ POLICIES = (
     "oracle",
 )
 REGIMES = (
-    ("deadline_0p05", "deadline", 0.05),
+    ("deadline_0p1", "deadline", 0.1),
     ("deadline_0p5", "deadline", 0.5),
     ("load_1p1", "load", 1.1),
     ("snr_plus3", "snr_offset", 3.0),
@@ -44,29 +44,15 @@ AGREEMENT_METRICS = (
 
 
 def regime_config(base, kind: str, value: float, seed: int):
-    benchmark = replace(
-        base.benchmark,
-        episodes=1,
-        schedulers=POLICIES,
-    )
+    benchmark = replace(base.benchmark, episodes=1, schedulers=POLICIES)
     cfg = replace(base, seed=seed, benchmark=benchmark)
     if kind == "deadline":
-        traffic = replace(
-            cfg.traffic,
-            deadline_s=value,
-            deadline_jitter_s=0.0,
-        )
+        traffic = replace(cfg.traffic, deadline_s=value, deadline_jitter_s=0.0)
         return replace(cfg, traffic=traffic)
     if kind == "load":
-        return replace(
-            cfg,
-            traffic=replace(cfg.traffic, offered_load=value),
-        )
+        return replace(cfg, traffic=replace(cfg.traffic, offered_load=value))
     if kind == "snr_offset":
-        link = replace(
-            cfg.link,
-            reference_snr_db=cfg.link.reference_snr_db + value,
-        )
+        link = replace(cfg.link, reference_snr_db=cfg.link.reference_snr_db + value)
         return replace(cfg, link=link)
     raise ValueError(kind)
 
@@ -76,7 +62,6 @@ def pair_stats(a, b):
     selected_b = b.selected_vehicle
     if selected_a.shape != selected_b.shape:
         raise ValueError("paired traces have different lengths")
-
     active_a = selected_a >= 0
     active_b = selected_b >= 0
     both_active = active_a & active_b
@@ -87,11 +72,7 @@ def pair_stats(a, b):
     def fraction(mask):
         return float(np.mean(mask)) if slots else float("nan")
 
-    if np.any(both_active):
-        active_agreement = float(np.mean(agreement[both_active]))
-    else:
-        active_agreement = float("nan")
-
+    active_agreement = float(np.mean(agreement[both_active])) if np.any(both_active) else float("nan")
     return {
         "slots": slots,
         "all_slot_agreement": fraction(agreement),
@@ -115,15 +96,9 @@ def chosen_state(output):
             "mean_queue_at_choice": float("nan"),
         }
     return {
-        "chosen_actual_outage_fraction": float(
-            np.mean(output.actual_outage[slots, vehicles])
-        ),
-        "chosen_actual_snr_db": float(
-            np.mean(output.actual_snr_db[slots, vehicles])
-        ),
-        "mean_queue_at_choice": float(
-            np.mean(output.queue_packets[slots, vehicles])
-        ),
+        "chosen_actual_outage_fraction": float(np.mean(output.actual_outage[slots, vehicles])),
+        "chosen_actual_snr_db": float(np.mean(output.actual_snr_db[slots, vehicles])),
+        "mean_queue_at_choice": float(np.mean(output.queue_packets[slots, vehicles])),
     }
 
 
@@ -148,88 +123,51 @@ def write_csv(path: Path, rows):
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description=(
-            "Decision-level mechanism audit for corrected predictive schedulers."
-        )
-    )
+    parser = argparse.ArgumentParser(description="Decision-level mechanism audit for corrected predictive schedulers.")
     parser.add_argument("--config", default="configs/default.json")
     parser.add_argument("--output", default="artifacts/decision_audit")
     args = parser.parse_args()
-
     base = load_config(args.config)
     rows = []
     state_rows = []
-
     for label, kind, value in REGIMES:
         for seed in SEEDS:
             config = regime_config(base, kind, value, seed)
             outputs = run_synthetic_benchmark(config)
             by_scheduler = {output.metrics.scheduler: output for output in outputs}
-
             for name in POLICIES:
-                state_rows.append(
-                    state_row(label, seed, name, by_scheduler[name])
-                )
-
+                state_rows.append(state_row(label, seed, name, by_scheduler[name]))
             for policy_a, policy_b in PAIRS:
-                rows.append(
-                    {
-                        "regime": label,
-                        "seed": seed,
-                        "policy_a": policy_a,
-                        "policy_b": policy_b,
-                        **pair_stats(
-                            by_scheduler[policy_a],
-                            by_scheduler[policy_b],
-                        ),
-                    }
-                )
-
+                rows.append({
+                    "regime": label,
+                    "seed": seed,
+                    "policy_a": policy_a,
+                    "policy_b": policy_b,
+                    **pair_stats(by_scheduler[policy_a], by_scheduler[policy_b]),
+                })
     output_dir = Path(args.output)
     output_dir.mkdir(parents=True, exist_ok=True)
     write_csv(output_dir / "decision_agreement.csv", rows)
     write_csv(output_dir / "chosen_state.csv", state_rows)
-
     summary = {}
     for label, _, _ in REGIMES:
         summary[label] = {}
         for policy_a, policy_b in PAIRS:
-            selected_rows = [
-                row
-                for row in rows
-                if row["regime"] == label
-                and row["policy_a"] == policy_a
-                and row["policy_b"] == policy_b
-            ]
+            selected_rows = [row for row in rows if row["regime"] == label and row["policy_a"] == policy_a and row["policy_b"] == policy_b]
             summary[label][f"{policy_a}__vs__{policy_b}"] = {
-                metric: float(
-                    np.nanmean([row[metric] for row in selected_rows])
-                )
+                metric: float(np.nanmean([row[metric] for row in selected_rows]))
                 for metric in AGREEMENT_METRICS
             }
-
     payload = {
-        "schema_version": 2,
+        "schema_version": 3,
         "evidence_tier": "EXECUTED_DIAGNOSTIC",
+        "note": "Diagnostic seeds and scheduler family; not the frozen confirmatory holdout. The pre-correction non-representable 0.05 s deadline has been replaced by the corrected 0.1 s regime.",
         "seeds": list(SEEDS),
         "policies": list(POLICIES),
         "regimes": summary,
     }
-    (output_dir / "decision_audit_summary.json").write_text(
-        json.dumps(payload, indent=2, allow_nan=True),
-        encoding="utf-8",
-    )
-    print(
-        json.dumps(
-            {
-                "rows": len(rows),
-                "state_rows": len(state_rows),
-                "output": str(output_dir),
-            },
-            indent=2,
-        )
-    )
+    (output_dir / "decision_audit_summary.json").write_text(json.dumps(payload, indent=2, allow_nan=True), encoding="utf-8")
+    print(json.dumps({"rows": len(rows), "state_rows": len(state_rows), "output": str(output_dir)}, indent=2))
 
 
 if __name__ == "__main__":
