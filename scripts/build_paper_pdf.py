@@ -42,7 +42,7 @@ def _register_fonts() -> None:
     pdfmetrics.registerFont(
         TTFont(
             "DejaVuSansMono-Oblique",
-            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Oblique.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
         )
     )
     pdfmetrics.registerFont(
@@ -186,8 +186,8 @@ def build(output_path: str | Path | None = None) -> Path:
         rightMargin=18 * mm,
         topMargin=16 * mm,
         bottomMargin=16 * mm,
-        title="When Does Trajectory Prediction Help PC-FMCW/DPSK Scheduling?",
-        author="Author to be inserted",
+        title="When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?",
+        author="Panagiota Grosdouli",
     )
     width = A4[0] - document.leftMargin - document.rightMargin
     story = []
@@ -241,25 +241,25 @@ def build(output_path: str | Path | None = None) -> Path:
                 next_line = lines[index + 1].strip()
                 if (
                     not next_line
-                    or next_line.startswith(("#", "|", "- ", "!["))
+                    or next_line.startswith(("# ", "## ", "![", "|", "- "))
                     or (next_line.startswith("*") and next_line.endswith("*"))
                 ):
                     break
-                index += 1
                 paragraph.append(next_line)
+                index += 1
             story.append(Paragraph(_inline(" ".join(paragraph)), STYLES["Body"]))
         index += 1
-    destination.parent.mkdir(parents=True, exist_ok=True)
     document.build(story, onFirstPage=_footer, onLaterPages=_footer)
     return destination
 
 
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", default=str(OUTPUT))
+    args = parser.parse_args()
+    destination = build(args.output)
+    print(destination)
+
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Render the paper Markdown as PDF.")
-    parser.add_argument(
-        "--output",
-        default=str(OUTPUT.relative_to(ROOT)),
-        help="Output PDF, relative to the repository unless absolute.",
-    )
-    arguments = parser.parse_args()
-    print(build(arguments.output))
+    main()
