@@ -1,80 +1,73 @@
-# Paper 1 Completion Audit
+# Paper 1 Completion Audit — Corrected Evidence
 
 **Scope:** PAPER1 — mechanism / operating-region study  
-**Repository:** `panagiotagrosdouli/predictive-pc-fmcw-vehicular-communications.`  
+**Repository:** `panagiotagrosdouli/predictive-pc-fmcw-vehicular-communications`  
 **Evidence boundary:** model-based PC-FMCW/DPSK-informed simulation; no measured optical-link or real-world vehicular validation claim.
 
-## 1. What existed before final closure
+## 1. Audit correction
 
-The repository already contained the scientific implementation needed for a strong Part-B mechanism study: a causal trajectory-to-link-to-packet pipeline; classical predictors; reactive and predictive scheduling policies; an evaluator-only Oracle; packet queues, deadlines, retries and packet-level KPIs; operating-region and robustness infrastructure; paired statistical analysis; Part-A provenance; extensive scientific tests; and a manuscript/roadmap that explicitly preserved negative and null findings.
+The September 2026 final reproducibility audit found a packet-deadline discretization defect in the historical Paper-1 simulator. An N-slot physical deadline had been represented by inclusive last-service index `arrival + N`, allowing N+1 service slots. The historical 0.05 s deadline was also not exactly representable with the 0.1 s simulator slot duration.
 
-The strongest already executed Paper-1 evidence was the prospectively selected current-service-guard study on a disjoint synthetic holdout. Its policy-selection and holdout protocol were frozen before holdout evaluation.
+The corrected implementation uses `arrival + N - 1` and rejects non-integral physical deadlines. Consequently, historical workflow run `34055071988`, the historical `service_guarded_80` selection, and the historical 3/4 HELP result are pre-correction provenance only and are not final Paper-1 evidence.
 
-## 2. What was changed during Paper-1 closure
+## 2. Corrected executed evidence
 
-Paper 1 was separated cleanly from incomplete Paper-2 learned-model claims. A frozen Paper-1 scientific protocol was added, together with a publication-facing final draft and an updated Paper-1 README. The proposed method is now stated precisely as predictive communication-aware scheduling with a prospectively selected current-service guard that limits predictive reordering when it sacrifices excessive immediate service opportunity.
+The corrected prospective protocol was executed in workflow run `34785876008` at source SHA `2e3f48a3fa7597371d1fcb8ef505f40e2c52a1a1`. The uploaded artifact is ID `10326910705`, name `prospective-current-service-guard`, digest `sha256:10ad8a88f4d8fa25216603b5e06171a464ab706adb9421793a3742b177127407`.
 
-No numerical result, external-data result, learned checkpoint, or optical measurement was invented.
+Development seeds `20270101`--`20270110` and holdout seeds `20270201`--`20270220` are disjoint. The corrected development rule selected `service_guarded_100` (guard ratio 1.0) before holdout inspection.
 
-## 3. What was actually executed
+The four corrected predeclared regimes are deadline 0.1 s, deadline 0.5 s, offered load 1.1, and reference SNR +3 dB.
 
-The confirmatory evidence used in Paper 1 was already executed and provenance documented. The frozen `service_guarded_80` policy was selected using development seeds `20261101`--`20261110`, then evaluated once on disjoint holdout seeds `20261201`--`20261220` in four predeclared regimes. The primary endpoint was paired candidate-minus-Reactive goodput. Analysis used 100,000 paired bootstrap replicates, a 95% CI, paired Wilcoxon signed-rank tests, Holm correction across the four primary comparisons, paired Cohen dz and win/loss/tie fractions.
+## 3. Corrected primary statistics
 
-After the Paper-1 protocol/manuscript merge, repository CI also executed successfully on `main` at commit `e89c3df56f73e876ecbc8a2a4c5322903aacc6d9` (workflow run `34118112069`). The CI workflow covers editable installation, Ruff, pytest, stage-entrypoint checks and `pcfmcw validate`.
+The primary endpoint is paired candidate-minus-Reactive-Greedy goodput. The independent inferential unit is the paired episode/seed within regime. The frozen analysis uses 100,000 paired percentile bootstrap replicates, 95% confidence intervals, two-sided paired Wilcoxon signed-rank tests, Holm correction across four comparisons, paired Cohen dz, and a +/-0.001 Mbps practical margin.
 
-## 4. Strongest positive result
+| Regime | Mean delta goodput (Mbps) | 95% CI | Holm p | Cohen dz | Classification |
+|---|---:|---:|---:|---:|---|
+| deadline 0.1 s | +0.00000 | [0.00000, 0.00000] | 1.0 | 0.000 | NEUTRAL_OR_UNCERTAIN |
+| deadline 0.5 s | +0.00035 | [0.00000, 0.00105] | 1.0 | 0.224 | NEUTRAL_OR_UNCERTAIN |
+| load 1.1 | -0.00050 | [-0.00455, 0.00285] | 1.0 | -0.060 | NEUTRAL_OR_UNCERTAIN |
+| SNR +3 dB | +0.00080 | [-0.00080, 0.00255] | 1.0 | 0.208 | NEUTRAL_OR_UNCERTAIN |
 
-The strongest confirmatory gain is the 0.5 s deadline regime:
+For deadline 0.1 s all paired differences are zero; the Wilcoxon test is therefore degenerate and the corrected summary conservatively records Holm-adjusted p = 1.0. The other corrected raw Wilcoxon p-values are 0.3173, 1.0, and 0.2733; all Holm-adjusted p-values are 1.0.
 
-- mean paired goodput gain: **+0.05680 Mbps**;
-- 95% paired bootstrap CI: **[+0.04015, +0.07530] Mbps**;
-- Holm-adjusted p: **0.000527**;
-- paired Cohen dz: **1.384**;
-- classification: **HELP**.
+## 4. Scientific interpretation
 
-Two additional predeclared regimes are also classified HELP: deadline 0.05 s and reference SNR +3 dB.
+The corrected evidence does not support a claim that the guarded predictive scheduler improves three of four regimes. It also does not prove that predictive and reactive policies are universally identical.
 
-## 5. Strongest negative/null result
+The defensible result is a null/mixed mechanism finding: future information can alter candidate decisions in diagnostics, but the robust current-service guard selected by the frozen cross-regime development rule largely removes incremental packet-level benefit on the fresh holdout. Protecting immediate service opportunity suppresses harmful reordering, but at guard ratio 1.0 it also leaves little opportunity for predictive reordering to improve realized goodput.
 
-Under offered load 1.1, the primary goodput effect is **NEUTRAL_OR_UNCERTAIN**:
+## 5. Claim boundary and novelty
 
-- mean paired goodput gain: **+0.00860 Mbps**;
-- 95% paired bootstrap CI: **[-0.00230, +0.02050] Mbps**;
-- Holm-adjusted p: **0.295869**;
-- paired Cohen dz: **0.322**.
+Paper 1 must not make categorical first-of-kind claims for trajectory prediction in VLC, predictive vehicular scheduling, deadline-aware resource allocation, PC-FMCW, phase coding, or vehicular optical communication. Prior work exists on trajectory prediction for dynamic VLC and on resource utilization/lifetime in VLC-based vehicular networks.
 
-The same high-load regime has a descriptive P95-latency penalty of about **+50 ms**, with bootstrap interval **[+20, +85] ms**. This prevents a universal superiority claim and is retained as a central limitation/failure regime.
+The contribution is narrower: a causal, auditable trajectory-to-link-to-packet mechanism study with explicit queue/deadline scheduling, ground-truth-derived realization, prospective guard selection, paired holdout inference, and preservation of null/negative findings.
 
-Earlier unconstrained predictive diagnostics also showed that prediction can become harmful under congestion and urgent/bulk traffic. Those diagnostics are mechanism evidence, not silently promoted confirmatory hypotheses.
+The optical channel remains analytical/model-based. No measured end-to-end optical-channel validation, road deployment, hardware-in-the-loop validation, or globally optimal scheduling is claimed.
 
-## 6. Statistical significance and effect sizes
+## 6. Paper-1 / Paper-2 separation
 
-Three of four predeclared confirmatory holdout regimes satisfy the frozen practical HELP rule and survive Holm-adjusted paired testing. The high-load regime does not. The independent statistical unit is the paired episode/seed, not packet or time samples. Secondary endpoints remain secondary/descriptive unless separately preregistered.
+Paper 1 is the classical/mechanism study and does not depend on incomplete learned GRU/WOMD evidence. Paper 2 remains incomplete and requires the canonical learned-data provenance, complete four-objective by five-seed archive, held-out/OOD evaluation, communication-aware ablations, packet evaluation, statistics, and its own immutable publication package.
 
-## 7. Why prediction helps — and why it can fail
+## 7. Repository synchronization performed in final audit branch
 
-The evidence supports a conditional mechanism. Future geometry/link information is useful when it changes service order before a communication-relevant boundary and when the cost of that reordering is controlled. Prediction can fail when future link urgency conflicts with packet urgency or with a strong current service opportunity. The current-service guard targets that service-order failure mode; it does not solve congestion universally and is not claimed optimal.
+The final audit branch synchronizes the Paper-1 README, frozen protocol, Markdown manuscript, completion audit, and publication manifest to the corrected evidence. Historical pre-correction files may remain only when explicitly labeled as historical provenance.
 
-## 8. Remaining limitations
+The canonical LaTeX manuscript already reflects the corrected holdout result and deliberately retains non-invented author metadata placeholders.
 
-The optical channel is model-based and uses declared geometry/reference-SNR/pointing/FoV assumptions. The Part-A waveform parameters and receiver provenance provide physical-layer context but do not constitute measured end-to-end vehicular optical calibration. The confirmatory Paper-1 holdout is synthetic. There is no real-road deployment, hardware-in-the-loop experiment, or measured vehicular optical-channel validation. The 0.8 guard is selected for the frozen study, not claimed globally optimal. Learned GRU/WOMD evidence is excluded and remains Paper 2 work.
+## 8. Remaining submission gates
 
-## 9. Readiness for university Part B
+The scientific evidence and manuscript narrative are corrected. External submission still requires:
 
-**READY, with an explicit simulation/model claim boundary.**
+- final CI and LaTeX/PDF build on the final synchronized branch head;
+- visual/content audit of the resulting PDF;
+- real author, affiliation, city/country, and email metadata;
+- final venue-specific formatting and submission metadata if applicable.
 
-Paper 1 satisfies the Part-B requirement to propose and evaluate a technique intended to improve system performance. The contribution goes beyond an idea or simple plot: it includes an implemented predictive scheduling method, causal/fair baseline comparisons, a prospectively selected refinement, paired holdout evaluation, confidence intervals, hypothesis tests, effect sizes, multiple-comparison correction, negative/null findings, mechanism analysis, robustness infrastructure, provenance and reproducibility controls.
-
-The defensible Part-B conclusion is not that prediction always improves the system. It is:
-
-> Predictive communication-aware scheduling can improve modeled packet-level performance in specific operating regimes when future link information is actionable and immediate service opportunity is protected; under high load the benefit is uncertain and latency can worsen.
-
-## 10. Readiness for actual publication
-
-**STRONG MINI-PAPER / PRE-PUBLICATION QUALITY, but not equivalent to externally validated publication evidence.**
-
-The methodology, causality, statistics, negative-result handling and provenance are publication-style. A stronger journal/conference claim would benefit from independent real-motion external validation and/or measured/calibrated optical-channel evidence. Paper 2 would additionally require the complete frozen learned-model pipeline and its 20 verified checkpoints.
+These items must not be fabricated.
 
 ## Final status
 
-Paper 1 is scientifically closed for the university Part-B scope using the evidence that has actually been executed. Any future extension must preserve the existing evidence labels and must not retroactively convert diagnostic or synthetic outputs into physical measurements.
+**PASS WITH HUMAN/EXECUTION BLOCKERS.**
+
+Corrected primary evidence exists and the scientific narrative can be synchronized without inventing results. The remaining blockers are final branch-head execution/build verification, final PDF inspection, and human author/submission metadata. Paper 1 remains a synthetic/model-based mechanism study, not externally measured validation.
