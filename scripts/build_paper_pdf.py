@@ -24,7 +24,7 @@ from reportlab.platypus import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "paper" / "PAPER_DRAFT.md"
+SOURCE = ROOT / "paper" / "paper1" / "manuscript" / "PAPER1_FINAL_DRAFT.md"
 OUTPUT = ROOT / "output" / "pdf" / "predictive_pc_fmcw_corrected_research_draft.pdf"
 STYLES: dict[str, ParagraphStyle] = {}
 
