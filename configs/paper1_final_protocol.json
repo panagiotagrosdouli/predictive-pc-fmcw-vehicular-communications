@@ -1,30 +1,35 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "scope": "PAPER1",
-  "status": "FROZEN_CORRECTED_PROTOCOL_PENDING_EXECUTION",
+  "status": "FROZEN_CORRECTED_PROTOCOL_EXECUTED",
   "title": "When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?",
-  "research_question": "When, why, and under which operating regimes does causal trajectory/link prediction improve packet-level scheduling relative to reactive scheduling?",
+  "research_question": "When, why, and under which operating regimes does causal trajectory/link prediction change packet-level scheduling relative to reactive scheduling, and when does that information fail to provide robust packet-level value?",
   "claim_boundary": {
     "mobility_evidence": "controlled synthetic for the corrected service-guard holdout; legacy compact WOMD/proxy outputs are diagnostic only",
-    "optical_link": "PC-FMCW/DPSK-informed analytical/simulation model with a separately verified Part-A receiver BER LUT",
+    "optical_link": "PC-FMCW/DPSK-informed analytical/simulation model with separately verified Part-A receiver BER evidence",
     "measured_optical_channel": false,
     "real_world_deployment": false,
+    "hardware_in_loop_validation": false,
     "learned_gru_results_in_scope": false
   },
   "correction": {
     "reason": "Historical packet deadlines used arrival + N as an inclusive last-service slot, which allowed N+1 service slots. The corrected simulator uses arrival + N - 1 and rejects physical deadlines that are not exactly representable at the configured slot duration.",
-    "historical_primary_evidence": "artifacts/paper1_final/primary_statistics.json",
     "historical_source_workflow_run": 34055071988,
-    "historical_status": "PRE_CORRECTION_ONLY",
-    "required_action": "Execute this corrected protocol on fresh development and holdout seeds before final Paper-1 headline claims are restored."
+    "historical_selected_policy": "service_guarded_80",
+    "historical_status": "PRE_CORRECTION_ONLY_DO_NOT_USE_FOR_FINAL_INFERENCE",
+    "historical_invalid_regime": "deadline_0p05 at slot_duration_s=0.1"
+  },
+  "corrected_execution": {
+    "workflow_run": 34785876008,
+    "head_sha": "2e3f48a3fa7597371d1fcb8ef505f40e2c52a1a1",
+    "artifact_id": 10326910705,
+    "artifact_name": "prospective-current-service-guard",
+    "artifact_digest": "sha256:10ad8a88f4d8fa25216603b5e06171a464ab706adb9421793a3742b177127407",
+    "conclusion": "success"
   },
   "part_a_reference": {
     "path": "configs/part_a_physical_layer.json",
     "upstream_commit": "44d62e3478e3818d1757b00971890f844cb032f7",
-    "carrier_frequency_hz": 193400000000000.0,
-    "chirp_bandwidth_hz": 10000000000.0,
-    "chirp_duration_s": 0.00001,
-    "data_rate_bps": 1000000000.0,
     "received_power_semantics": "normalized/model-based, not calibrated watts"
   },
   "reference_simulation": {
@@ -41,28 +46,12 @@
     "deadline_s": 1.2,
     "deadline_jitter_s": 0.4
   },
-  "classical_predictors": [
-    "last_position",
-    "constant_velocity",
-    "constant_acceleration",
-    "kalman_cv",
-    "imm"
-  ],
-  "scheduler_context": [
-    "random",
-    "round_robin",
-    "reactive_greedy",
-    "proportional_fair",
-    "cv_predictive",
-    "kalman_predictive",
-    "imm_predictive",
-    "predictive_utility",
-    "link_lifetime",
-    "oracle"
-  ],
+  "classical_predictors": ["last_position", "constant_velocity", "constant_acceleration", "kalman_cv", "imm"],
   "confirmatory_method": {
     "selection_protocol": "configs/service_guard_selection_protocol.json",
     "analysis_protocol": "configs/service_guard_holdout_analysis_protocol.json",
+    "selected_policy": "service_guarded_100",
+    "guard_ratio": 1.0,
     "development_seeds": [20270101, 20270102, 20270103, 20270104, 20270105, 20270106, 20270107, 20270108, 20270109, 20270110],
     "holdout_seeds": [20270201, 20270202, 20270203, 20270204, 20270205, 20270206, 20270207, 20270208, 20270209, 20270210, 20270211, 20270212, 20270213, 20270214, 20270215, 20270216, 20270217, 20270218, 20270219, 20270220],
     "regimes": [
@@ -72,7 +61,7 @@
       {"name": "snr_plus3", "kind": "snr_offset_db", "value": 3.0}
     ],
     "primary_endpoint": "paired candidate-minus-Reactive goodput_mbps within regime",
-    "independent_unit": "holdout seed within operating regime",
+    "independent_unit": "paired holdout seed within operating regime",
     "pairing": "same deterministic synthetic mobility scenario and traffic trace for candidate and Reactive",
     "bootstrap_replicates": 100000,
     "bootstrap_seed": 20260914,
@@ -80,23 +69,16 @@
     "practical_margin_mbps": 0.001,
     "paired_test": "two-sided Wilcoxon signed-rank",
     "multiplicity": "Holm across four predeclared primary regime comparisons",
-    "effect_sizes": ["paired Cohen dz", "win/loss/tie fractions"],
-    "secondary_metrics": ["pdr", "demand_normalized_fairness", "p95_latency_ms"]
+    "effect_sizes": ["paired Cohen dz", "win/loss/tie fractions"]
+  },
+  "corrected_primary_result": {
+    "summary_path": "artifacts/paper1_final/primary_statistics.json",
+    "classification": "all four regimes NEUTRAL_OR_UNCERTAIN",
+    "interpretation": "The corrected holdout does not establish a robust incremental goodput advantage or harm for the prospectively selected service_guarded_100 policy relative to Reactive Greedy under the frozen practical-margin/95% CI rule."
   },
   "evidence_policy": {
-    "corrected_primary": "fresh corrected-deadline service-guard development/holdout execution required",
+    "corrected_primary": "workflow run 34785876008 and artifacts/paper1_final/primary_statistics.json",
     "historical_primary": "run 34055071988 retained as pre-correction provenance only",
-    "mechanism_background": [
-      "docs/HIGH_LOAD_SERVICE_ORDER_AUDIT.md",
-      "artifacts/corrected_v2/motion_baselines/forecast_summary.json",
-      "artifacts/corrected_v2/staged_experiments/staged_experiment_manifest.json",
-      "artifacts/corrected_v2/paper_ablations/paper_ablation_summary.json"
-    ],
-    "canonical_part_a_link": [
-      "artifacts/paper_final/02_link/dbpsk_ber_lut.csv",
-      "artifacts/paper_final/02_link/link_verification.json",
-      "artifacts/paper_final/02_link/chirp_cluster_diagnostic.json"
-    ],
     "excluded_from_primary_inference": [
       "learned GRU/WOMD results",
       "compact WOMD proxy scheduling",
@@ -106,7 +88,7 @@
     ]
   },
   "required_interpretation": {
-    "negative_results_must_remain_visible": true,
+    "negative_null_mixed_results_must_remain_visible": true,
     "no_universal_claim": true,
     "oracle_label": "evaluator-only information reference, not a globally optimal offline scheduler",
     "deadline_semantics": "A physical packet deadline must equal an integer number of simulator slots; N slots permit service in exactly N slots including the arrival slot."
