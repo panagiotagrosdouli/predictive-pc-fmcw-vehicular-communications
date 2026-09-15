@@ -2,7 +2,7 @@
   "schema_version": 3,
   "scope": "PAPER1",
   "status": "FROZEN_CORRECTED_PROTOCOL_EXECUTED",
-  "title": "When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?",
+  "title": "When Does Future Mobility Information Have Packet-Level Value in Vehicular Optical Scheduling?",
   "research_question": "When, why, and under which operating regimes does causal trajectory/link prediction change packet-level scheduling relative to reactive scheduling, and when does that information fail to provide robust packet-level value?",
   "claim_boundary": {
     "mobility_evidence": "controlled synthetic for the corrected service-guard holdout; legacy compact WOMD/proxy outputs are diagnostic only",

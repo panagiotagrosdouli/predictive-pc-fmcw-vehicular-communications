@@ -16,9 +16,9 @@ This repository contains shared scientific infrastructure for **two distinct pub
 
 ### Paper 1 — mechanism and operating-region study
 
-**Working title:** *When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?*
+**Working title:** *When Does Future Mobility Information Have Packet-Level Value in Vehicular Optical Scheduling?*
 
-Paper 1 asks **when and why causal future-motion information has packet-level scheduling value**. It covers the causal mobility-to-link-to-packet pipeline, classical predictors, reactive/predictive scheduling, link-lifetime versus packet urgency, HELP/NEUTRAL/HURT operating regions, utility/service-order diagnostics, current-service guarded prediction, prospective DEV/HOLDOUT evaluation, and the statistics/robustness required to support those claims.
+Paper 1 asks **when and why causal future-motion information has packet-level scheduling value**. It covers the causal mobility-to-link-to-packet pipeline, classical predictors, reactive/predictive scheduling, link-lifetime versus packet urgency, a predeclared set of operating regimes, utility/service-order diagnostics, current-service guarded prediction, prospective DEV/HOLDOUT evaluation, and the statistics/robustness required to support those claims. The current corrected evidence does **not** establish a full operating-region map; any broader operating-region statement must remain explicitly conditional on the executed regimes.
 
 **Paper 1 does not require the GRU/WOMD learned study to be complete.** Learned-model results must not be used to block or inflate Paper 1.
 
@@ -47,7 +47,7 @@ The core Paper-1 research questions are:
 
 1. **RQ1 — From trajectory accuracy to link accuracy:** Does lower ADE/FDE imply better prediction of the future optical link, including range/bearing, SNR, outage and link lifetime?
 2. **RQ2 — From link accuracy to packet utility:** Does better future-link prediction actually improve packet-level outcomes such as goodput, PDR, latency, deadline satisfaction, queue behavior and fairness?
-3. **RQ3 — Operating regions:** Under which mobility, prediction-horizon, traffic-load, deadline, FoV, sensing-noise and channel conditions does predictive scheduling help, become neutral or hurt relative to reactive scheduling?
+3. **RQ3 — Predeclared operating regimes:** Under the frozen deadline, load and SNR regimes, when does predictive scheduling change decisions and when does that change fail to translate into packet utility?
 
 Paper 2 adds a distinct learned-model question:
 
@@ -92,9 +92,9 @@ Reusable implementation remains under `src/predictive_pc_fmcw/`; paper folders m
 | Trajectory -> link -> packet simulation | SHARED | Implemented and tested |
 | Part-A receiver-derived LUT | SHARED | Executed on a 31-point SNR grid |
 | Classical trajectory/link baselines | PAPER1 | Implemented; development evidence exists |
-| Predictive scheduling/mechanism diagnostics | PAPER1 | Executed diagnostic evidence exists |
-| Prospective current-service-guard DEV/HOLDOUT study | PAPER1 | Executed diagnostic/prospective evidence; final publication closure still required |
-| Complete canonical Paper-1 statistical/artifact release | PAPER1 | Not complete |
+| Predictive scheduling/mechanism diagnostics | PAPER1 | Frozen diagnostic protocol and executable audit are in place; final post-merge execution is the release gate |
+| Prospective current-service-guard DEV/HOLDOUT study | PAPER1 | Corrected primary evidence executed; final publication closure requires the exact final CI/PDF release cycle |
+| Complete canonical Paper-1 statistical/artifact release | PAPER1 | Pending final post-merge diagnostic/PDF release cycle |
 | Historical WOMD training fingerprint | PAPER2 | Provenance fingerprint only |
 | Complete four-objective x five-seed learned archive | PAPER2 | Missing / not complete |
 | Official learned held-out/OOD evaluation | PAPER2 | Blocked until real data/checkpoints exist |
