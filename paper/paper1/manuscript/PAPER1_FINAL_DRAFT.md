@@ -1,5 +1,9 @@
 # When Does Trajectory Prediction Help PC-FMCW/DPSK Vehicular Optical Scheduling?
 
+**Panagiota Grosdouli**  
+Department of Electrical and Computer Engineering, Democritus University of Thrace, Xanthi, Greece  
+Email: panagros1@ee.duth.gr
+
 ## Abstract
 
 Predictive scheduling is often motivated by the intuition that future vehicle motion reveals communication opportunities before a reactive scheduler can observe them. This paper tests that claim for a model-based PC-FMCW/DPSK vehicular optical link without assuming that prediction is universally beneficial. We implement a strictly causal chain from observed vehicle history to trajectory prediction, future relative geometry, predicted link quality, packet queues and deadlines, scheduling, and realized packet-level outcomes. During final audit, an inclusive packet-deadline discretization defect was identified and corrected. The current-service guard was then prospectively re-selected on fresh development seeds and evaluated once on a disjoint 20-seed synthetic holdout. The corrected development protocol selected a 1.0 guard. Across four predeclared holdout regimes—0.1 s and 0.5 s deadlines, offered load 1.1, and +3 dB reference SNR—all primary goodput comparisons against Reactive Greedy are NEUTRAL_OR_UNCERTAIN under the frozen practical-margin/95% CI rule. The corrected evidence therefore does not support the historical pre-correction 3/4-improvement headline. Instead, it shows that protecting immediate service opportunity can make the selected predictive scheduler behave almost reactively at packet level. The optical channel is an analytical PC-FMCW/DPSK-informed simulation model; no measured optical-link or real-world vehicular validation is claimed.
@@ -8,7 +12,7 @@ Predictive scheduling is often motivated by the intuition that future vehicle mo
 
 PC-FMCW laser-headlamp concepts can combine sensing, illumination, and DPSK communication. A mobility-aware scheduler raises a system-level question: should a receiver be served now because predicted future geometry indicates that its communication opportunity is about to degrade or disappear?
 
-A reactive scheduler sees current link quality. A predictive scheduler can estimate future relative range and bearing and therefore future modeled SNR, BER/PER, outage, and link lifetime. Such information can be actionable near field-of-view, deadline, and link-loss boundaries, but forecast-driven urgency can also sacrifice a strong current transmission opportunity.
+A reactive scheduler sees current link quality. A predictive scheduler can estimate future relative range and bearing and therefore future modeled SNR, BER/PER, goodput, outage, and link lifetime. Such information can be actionable near field-of-view, deadline, and link-loss boundaries, but forecast-driven urgency can also sacrifice a strong current transmission opportunity.
 
 Accordingly, Paper 1 asks when and why causal future-motion/link information changes packet-level scheduling relative to reactive scheduling. The contribution is a reproducible mechanism study, not a universal prediction-gain claim.
 
