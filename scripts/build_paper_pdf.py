@@ -62,7 +62,8 @@ def _inline(text: str) -> str:
         escaped,
     )
     escaped = re.sub(
-        r"`(.+?)`", r'<font name="DejaVuSansMono" size="7.5">\1</font>', escaped
+        r"`(.+?)`", r'<font name="DejaVuSansMono" size="7.5">\1</font>',
+        escaped,
     )
     return escaped
 
