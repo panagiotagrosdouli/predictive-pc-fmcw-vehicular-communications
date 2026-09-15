@@ -134,7 +134,10 @@ def write_csv(path: Path, rows):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Decision-level mechanism audit for corrected predictive schedulers."
+        description=(
+            "Decision-level mechanism audit for corrected predictive "
+            "schedulers."
+        )
     )
     parser.add_argument("--config", default="configs/default.json")
     parser.add_argument("--output", default="artifacts/decision_audit")
