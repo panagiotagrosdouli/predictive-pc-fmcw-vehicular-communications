@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 from dataclasses import replace
 from pathlib import Path
 
@@ -182,8 +183,11 @@ def main():
                 for metric in AGREEMENT_METRICS
             }
     payload = {
-        "schema_version": 3,
+        "schema_version": 4,
         "evidence_tier": "EXECUTED_DIAGNOSTIC",
+        "scope": "PAPER1",
+        "protocol": "paper/paper1/MECHANISM_DIAGNOSTIC_PROTOCOL.md",
+        "source_commit_sha": os.environ.get("GITHUB_SHA", "unknown"),
         "note": (
             "Diagnostic seeds and scheduler family; not the frozen confirmatory "
             "holdout. The pre-correction non-representable 0.05 s deadline has "
